@@ -22,7 +22,7 @@ class Sokoban {
             return countBoxes(getCoords(direction, boxCoords), direction) + 1;
         }
 
-        return 0;
+        return 1;
     }
 
     void moveBox(Coords boxCoords) {
@@ -76,8 +76,8 @@ class Sokoban {
     	return {
     	    {LEFT, this->board[playerCoords.first][playerCoords.second - 1]},
     	    {RIGHT, this->board[playerCoords.first][playerCoords.second + 1]},
-    	    {UP, this->board[playerCoords.first][playerCoords.second - 1]},
-    	    {DOWN, this->board[playerCoords.first][playerCoords.second + 1]}
+    	    {UP, this->board[playerCoords.first - 1][playerCoords.second]},
+    	    {DOWN, this->board[playerCoords.first + 1][playerCoords.second]}
     	};
     }
 
@@ -110,7 +110,6 @@ public:
             if (isBox(adj[direction])) {
                 this->movePlayerAndBox(direction);
             } else if (isTraversible(adj[direction])) {
-            	cout << "move";
                 this->movePlayer(direction);
             }
         }
