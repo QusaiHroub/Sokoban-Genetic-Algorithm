@@ -21,7 +21,7 @@ vector<vector<eMaterial>> example = {
 };
 
 struct Properties {
-    const static usize geneLength = 100;
+    const static usize geneLength = 250;
     const static usize eInsturctionsLength = 4;
     const static usize pivot = 57;
 };

@@ -10,6 +10,14 @@ bool isBox (eMaterial cell) {
     return cell == BOX || cell == BOX_IN_PLACE;
 }
 
+bool isBoxNotInPlace (eMaterial cell) {
+	return cell == BOX;
+}
+
+bool isBoxInPlace (eMaterial cell) {
+	return cell == BOX_IN_PLACE;
+}
+
 bool isEmpty (eMaterial cell) {
     return cell == EMPTY;
 }
@@ -19,7 +27,7 @@ bool isWall (eMaterial cell) {
 }
 
 bool isVoid (eMaterial cell) {
-    return cell == VOID;
+    return cell == VOID || cell == BOX_IN_PLACE;
 }
 
 bool isPlayer (eMaterial cell) {

@@ -4,11 +4,13 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <set>
 
 using std::cout;
 using std::vector;
 using std::unordered_map;
 using std::pair;
+using std::set;
 
 #include "constants.hh"
 #include "utils.hh"
@@ -18,8 +20,18 @@ using std::pair;
 class Sokoban {
     Coords playerCoords;
     Grid originBoard, board;
-    usize boxesNotInPlace = 0;
-    bool plyear = false;
+    usize boxesNotInPlace = 0, boxes = 0;
+    bool player = false;
+    set<Coords> stuckBoxes;
+
+    unordered_map<eInstruction, eMaterial> getAdj(Coords coords) {
+    	return {
+    	    {LEFT, this->board[coords.first][coords.second - 1]},
+    	    {RIGHT, this->board[coords.first][coords.second + 1]},
+    	    {UP, this->board[coords.first - 1][coords.second]},
+    	    {DOWN, this->board[coords.first + 1][coords.second]}
+    	};
+    }
 
     int countBoxes(Coords boxCoords, eInstruction direction) {
         if (isBox(this->board[boxCoords.first][boxCoords.second])) {
@@ -29,13 +41,19 @@ class Sokoban {
         return 1;
     }
 
-    void moveBox(Coords boxCoords) {
+    void moveBox(Coords boxCoords, bool wasNotInPlace = false) {
         if (isVoid(originBoard[boxCoords.first][boxCoords.second])) {
             this->board[boxCoords.first][boxCoords.second] = BOX_IN_PLACE;
-            --boxesNotInPlace;
+
+            if (wasNotInPlace) {
+            	--boxesNotInPlace;
+            }
         } else {
             this->board[boxCoords.first][boxCoords.second] = BOX;
-            ++boxesNotInPlace;
+
+            if (!wasNotInPlace) {
+            	++boxesNotInPlace;
+            }
         }
     }
 
@@ -53,7 +71,8 @@ class Sokoban {
     void movePlayerAndBox(eInstruction direction) {
         Coords newPlayerCoords = getCoords(direction, playerCoords),
             newBoxCoords = getCoords(direction, newPlayerCoords),
-            lastBlockCoords;
+            lastBlockCoords,
+            temp;
         int numberOfBoxes = 0;
 
         if (isWall(this->board[newBoxCoords.first][newBoxCoords.second])) {
@@ -66,25 +85,41 @@ class Sokoban {
 
             if (isTraversible(this->board[lastBlockCoords.first][lastBlockCoords.second])) {
                 for (int i = 0; i < numberOfBoxes; ++i) {
-                    this->moveBox(getCoords(direction, newBoxCoords, i));
+                	temp = getCoords(direction, newPlayerCoords, i);
+                    this->moveBox(
+                    	getCoords(direction, newBoxCoords, i),
+                    	isBoxNotInPlace(this->board[temp.first][temp.second])
+                    );
                 }
 
                 this->movePlayer(direction);
+
+                unordered_map<eInstruction, eMaterial> adj = getAdj(lastBlockCoords);
+
+		        if (
+					!isVoid(this->originBoard[lastBlockCoords.first][lastBlockCoords.second]) &&
+					(isWall(adj[LEFT]) || isWall(adj[RIGHT])) &&
+					(isWall(adj[UP]) || isWall(adj[DOWN]))
+				) {
+				    stuckBoxes.insert(lastBlockCoords);
+				}
             }
-
         } else {
-            this->moveBox(newBoxCoords);
+            this->moveBox(
+            	newBoxCoords,
+            	isBoxNotInPlace(this->board[newPlayerCoords.first][newPlayerCoords.second])
+            );
             this->movePlayer(direction);
-        }
-    }
+            unordered_map<eInstruction, eMaterial> adj = getAdj(newBoxCoords);
 
-    unordered_map<eInstruction, eMaterial> getAdj() {
-    	return {
-    	    {LEFT, this->board[playerCoords.first][playerCoords.second - 1]},
-    	    {RIGHT, this->board[playerCoords.first][playerCoords.second + 1]},
-    	    {UP, this->board[playerCoords.first - 1][playerCoords.second]},
-    	    {DOWN, this->board[playerCoords.first + 1][playerCoords.second]}
-    	};
+		    if (
+		    	!isVoid(this->originBoard[newBoxCoords.first][newBoxCoords.second]) &&
+		    	(isWall(adj[LEFT]) || isWall(adj[RIGHT])) &&
+		    	(isWall(adj[UP]) || isWall(adj[DOWN]))
+		    ) {
+		        stuckBoxes.insert(newBoxCoords);
+		    }
+        }
     }
 
 public:
@@ -94,15 +129,19 @@ public:
 
 		for (usize i = 0; i < this->board.size(); ++i) {
 			for (usize j = 0; j < this->board[i].size(); ++j) {
-				if (!plyear && this->board[i][j] == PLAYER) {
+				if (!player && isPlayer(this->board[i][j])) {
 				   playerCoords.first = i;
 				   playerCoords.second = j;
 
-				   plyear = true;
+				   player = true;
 				}
 
-				if (this->board[i][j] == BOX) {
+				if (isBoxNotInPlace(this->board[i][j])) {
 					++boxesNotInPlace;
+				}
+
+				if (isBox(this->board[i][j])) {
+					++boxes;
 				}
 			}
 		}
@@ -114,7 +153,7 @@ public:
     }
 
     void move(eInstruction direction) {
-        unordered_map<eInstruction, eMaterial> adj = getAdj();
+        unordered_map<eInstruction, eMaterial> adj = getAdj(playerCoords);
 
         if (adj.find(direction) != adj.end()) {
             if (isBox(adj[direction])) {
@@ -127,30 +166,30 @@ public:
 
     void print() {
     	for (usize i = 0; i < this->board.size(); ++i) {
-	    for (usize j = 0; j < this->board[i].size(); ++j) {
-	    	switch (this->board[i][j]) {
-	    	case WALL:
-	    	    cout << "#";
-		    break;
-		case BOX_IN_PLACE:
-		    cout << "*";
-		    break;
-		case VOID:
-		    cout << ".";
-		    break;
-		case BOX:
-		    cout << "$";
-		    break;
-		case PLAYER:
-		    cout << "?";
-		    break;
-		case EMPTY:
-		    cout << " ";
-	    	}
-	    }
+			for (usize j = 0; j < this->board[i].size(); ++j) {
+				switch (this->board[i][j]) {
+					case WALL:
+						cout << "#";
+						break;
+					case BOX_IN_PLACE:
+						cout << "*";
+						break;
+					case VOID:
+						cout << ".";
+						break;
+					case BOX:
+						cout << "$";
+						break;
+					case PLAYER:
+						cout << "?";
+						break;
+					case EMPTY:
+						cout << " ";
+						}
+					}
 
-	    cout << '\n';
-	}
+			cout << '\n';
+		}
     }
 
     Grid getBoard () {
@@ -159,6 +198,22 @@ public:
 
     bool isEnd () {
     	return boxesNotInPlace == 0;
+    }
+
+    usize numberOfBoxes () {
+    	return boxes;
+    }
+
+    usize numberOfBoxesNotInPlace () {
+    	return boxesNotInPlace;
+    }
+
+    usize numberOfStuckBoxes () {
+    	return stuckBoxes.size();
+    }
+
+    set<Coords> getCoordsForStuckBoxes () {
+    	return stuckBoxes;
     }
 };
 

@@ -19,6 +19,7 @@ template <typename eInstructions, typename Properties>
 class Gene: public VGene<eInstructions> {
     vector<eInstructions> mList;
     Properties mProperties;
+    usize index = 0;
 
 public:
     Gene() {
@@ -34,6 +35,22 @@ public:
 
     vector<eInstructions> getInstructionsList () {
         return mList;
+    }
+
+    eInstructions getNext () {
+    	return mList[index++];
+    }
+
+    bool hasNext () {
+    	return index < mList.size();
+    }
+
+    void reset () {
+    	index = 0;
+    }
+
+    usize getNumberOfUnused () {
+    	return mList.size() - index;
     }
 
     vector<Gene> xover (Gene &parent) {
