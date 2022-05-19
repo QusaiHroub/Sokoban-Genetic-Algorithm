@@ -1,5 +1,5 @@
 ai_project_sources = [
-  'main.cpp',
+  'main.cc',
 ]
 
 ai_project_deps = [

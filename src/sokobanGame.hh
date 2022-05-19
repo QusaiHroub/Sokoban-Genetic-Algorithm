@@ -12,6 +12,8 @@ using std::pair;
 
 #include "constants.hh"
 #include "utils.hh"
+#include "types.hh"
+#include "sokobanTypes.hh"
 
 class Sokoban {
     Coords playerCoords;

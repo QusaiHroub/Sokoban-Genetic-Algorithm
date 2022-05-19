@@ -5,6 +5,7 @@
 
 using std::vector;
 
+#include "sokobanTypes.hh"
 #include "types.hh"
 
 vector<vector<eMaterial>> example = {
@@ -17,6 +18,12 @@ vector<vector<eMaterial>> example = {
   {WALL, BOX, EMPTY, BOX_IN_PLACE, BOX, BOX, VOID, WALL},
   {WALL, EMPTY, EMPTY, EMPTY, VOID, EMPTY, EMPTY, WALL},
   {WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL},
+};
+
+struct Properties {
+    const static usize geneLength = 100;
+    const static usize eInsturctionsLength = 4;
+    const static usize pivot = 57;
 };
 
 #endif

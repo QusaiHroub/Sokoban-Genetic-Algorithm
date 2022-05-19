@@ -4,7 +4,7 @@
 using std::pair;
 
 #include "constants.hh"
-#include "types.hh"
+#include "sokobanTypes.hh"
 
 bool isBox (eMaterial cell) {
     return cell == BOX || cell == BOX_IN_PLACE;
