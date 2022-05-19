@@ -18,6 +18,8 @@ using std::pair;
 class Sokoban {
     Coords playerCoords;
     Grid originBoard, board;
+    usize boxesNotInPlace = 0;
+    bool plyear = false;
 
     int countBoxes(Coords boxCoords, eInstruction direction) {
         if (isBox(this->board[boxCoords.first][boxCoords.second])) {
@@ -30,8 +32,10 @@ class Sokoban {
     void moveBox(Coords boxCoords) {
         if (isVoid(originBoard[boxCoords.first][boxCoords.second])) {
             this->board[boxCoords.first][boxCoords.second] = BOX_IN_PLACE;
+            --boxesNotInPlace;
         } else {
             this->board[boxCoords.first][boxCoords.second] = BOX;
+            ++boxesNotInPlace;
         }
     }
 
@@ -85,19 +89,23 @@ class Sokoban {
 
 public:
     Sokoban(Grid &board) {
-	this->board = board;
-	this->originBoard = board;
+		this->board = board;
+		this->originBoard = board;
 
-	for (usize i = 0; i < this->board.size(); ++i) {
-	    for (usize j = 0; j < this->board[i].size(); ++j) {
-	    	if (this->board[i][j] == PLAYER) {
-	    	   playerCoords.first = i;
-	    	   playerCoords.second = j;
+		for (usize i = 0; i < this->board.size(); ++i) {
+			for (usize j = 0; j < this->board[i].size(); ++j) {
+				if (!plyear && this->board[i][j] == PLAYER) {
+				   playerCoords.first = i;
+				   playerCoords.second = j;
 
-	    	   break;
-	    	}
-	    }
-	}
+				   plyear = true;
+				}
+
+				if (this->board[i][j] == BOX) {
+					++boxesNotInPlace;
+				}
+			}
+		}
     }
 
 
@@ -147,6 +155,10 @@ public:
 
     Grid getBoard () {
        return board;
+    }
+
+    bool isEnd () {
+    	return boxesNotInPlace == 0;
     }
 };
 
