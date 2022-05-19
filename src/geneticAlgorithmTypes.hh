@@ -66,6 +66,14 @@ public:
     }
 };
 
+template<typename Chromosome>
+class FitnessTerminiateSignalContainer {
+public:
+	virtual ~FitnessTerminiateSignalContainer() {};
+
+	virtual auto terminiateSignal () -> bool = 0;
+	virtual auto fitness (Chromosome &) -> int = 0;
+};
 
 typedef unsigned int usize;
 

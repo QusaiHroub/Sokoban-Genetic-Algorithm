@@ -8,20 +8,25 @@ using std::cout;
 #include "sokobanTypes.hh"
 #include "constants.hh"
 #include "simTypes.hh"
+#include "geneticAlgorithmTypes.hh"
 
-int itr = 100; // This only for testing.
-auto terminiateSignal() -> bool {
-    return itr--; // TODO
-}
+template<typename Chromosome>
+class SokobanFitnessTerminiateSignalContainer : public FitnessTerminiateSignalContainer<Chromosome> {
+    int itr = 100; // This only for testing.
+public:
+    auto terminiateSignal() -> bool {
+        return itr--; // TODO
+    }
 
-auto fitness (Chromosome &gene) -> int {
-    return lRand() % int(1e9 + 7); // TODO
-}
+    auto fitness (Chromosome &gene) -> int {
+        return lRand() % int(1e9 + 7); // TODO
+    }
+};
 
 int main() {
+    SokobanFitnessTerminiateSignalContainer<Chromosome> *sokobanFitnessTerminiateSignalContainer = new SokobanFitnessTerminiateSignalContainer<Chromosome>();
     SimGeneticAlgorithm geneticAlgorithm(
-        fitness,
-        terminiateSignal
+        dynamic_cast<FitnessTerminiateSignalContainer<Chromosome> *>(sokobanFitnessTerminiateSignalContainer)
     );
 
     Sokoban sokoban(example);
@@ -35,6 +40,8 @@ int main() {
     }
 
     cout << "Done...\n";
+
+    delete sokobanFitnessTerminiateSignalContainer;
 
     return 0;
 }

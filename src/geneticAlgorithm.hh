@@ -7,13 +7,12 @@ template<typename eInstructions, typename Gene>
 class GeneticAlgorithm {
     const usize mPopulationSize;
     Population<Gene> mPopulation;
-    auto (*mEvaluator)(Gene &gene) -> int;
-    auto (*mTerminiationCriteriaNotSatisfied)() -> bool;
+    FitnessTerminiateSignalContainer<Gene> *mFitnessTerminiateSignalContainer = nullptr;
 
     void InitPopulation (usize populationSize) {
         while (populationSize--) {
             Gene newGene = Gene();
-            mPopulation.push_back({ newGene, mEvaluator(newGene) });
+            mPopulation.push_back({ newGene, mFitnessTerminiateSignalContainer->fitness(newGene) });
         }
     }
 
@@ -42,26 +41,24 @@ class GeneticAlgorithm {
             }
 
             for (auto &gene: xoverResult) {
-                mPopulation.push_back({gene, mEvaluator(gene)});
+                mPopulation.push_back({gene, mFitnessTerminiateSignalContainer->fitness(gene)});
             }
         }
     }
 
 public:
     GeneticAlgorithm(
-        auto (*evaluator)(Gene &gene) -> int,
-        auto (*terminiationCriteriaNotSatisfied)() -> bool,
+        FitnessTerminiateSignalContainer<Gene> *fitnessTerminiateSignalContainer,
         usize populationSize = 100
     ) :
-        mEvaluator(evaluator),
-        mTerminiationCriteriaNotSatisfied(terminiationCriteriaNotSatisfied),
+    	mFitnessTerminiateSignalContainer(fitnessTerminiateSignalContainer),
         mPopulationSize(populationSize) {
 
         InitPopulation(populationSize);
     }
 
     void train() {
-        while (mTerminiationCriteriaNotSatisfied()) {
+        while (mFitnessTerminiateSignalContainer->terminiateSignal()) {
             selectNewParents();
             performXoverMutation();
         }
