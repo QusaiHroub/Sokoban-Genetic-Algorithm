@@ -1,6 +1,9 @@
 #ifndef SOKOBAN_TYPES
 #define SOKOBAN_TYPES
 
+#include <vector>
+
+using std::vector;
 using std::pair;
 
 enum eMaterial {

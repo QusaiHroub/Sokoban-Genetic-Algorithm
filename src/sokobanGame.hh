@@ -123,6 +123,8 @@ class Sokoban {
     }
 
 public:
+	Sokoban() {}
+
     Sokoban(Grid &board) {
 		this->board = board;
 		this->originBoard = board;
@@ -190,6 +192,38 @@ public:
 
 			cout << '\n';
 		}
+    }
+
+    vector<string> str() {
+    	vector<string> result;
+
+    	for (usize i = 0; i < this->board.size(); ++i) {
+    		result.push_back(string());
+
+			for (usize j = 0; j < this->board[i].size(); ++j) {
+				switch (this->board[i][j]) {
+					case WALL:
+						result.back().push_back('#');
+						break;
+					case BOX_IN_PLACE:
+						result.back().push_back('*');
+						break;
+					case VOID:
+						result.back().push_back('.');
+						break;
+					case BOX:
+						result.back().push_back('$');
+						break;
+					case PLAYER:
+						result.back().push_back('?');
+						break;
+					case EMPTY:
+						result.back().push_back(' ');
+					}
+			}
+		}
+
+    	return result;
     }
 
     Grid getBoard () {

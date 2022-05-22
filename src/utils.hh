@@ -84,9 +84,11 @@ eMaterial decode (char ch) {
 		return BOX;
 	case '?':
 		return PLAYER;
-	case ' ':
+	case ' ': case '0':
 		return EMPTY;
 	}
+
+	throw std::invalid_argument("");
 }
 
 Grid readBoard (string fileName) {
