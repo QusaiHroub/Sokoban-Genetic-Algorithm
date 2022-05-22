@@ -6,6 +6,7 @@
 template<typename eInstructions, typename Gene>
 class GeneticAlgorithm {
     const usize mPopulationSize;
+    const double mMutRate;
     Population<Gene> mPopulation;
     FitnessTerminiateSignalContainer<Gene> *mFitnessTerminiateSignalContainer = nullptr;
 
@@ -32,11 +33,13 @@ class GeneticAlgorithm {
 
     void performXoverMutation () {
         vector<Gene> xoverResult;
+        double mut;
 
         for (usize i = 1; i < mPopulationSize; i += 2) {
             xoverResult = mPopulation[i].first.xover(mPopulation[i - 1].first);
 
-            if (lRand() % 101 <= 17) {
+			mut = (lRand() % 101) / 101.0;
+            if (mut <= mMutRate) {
                 xoverResult[lRand() & 1].mutation();
             }
 
@@ -49,10 +52,12 @@ class GeneticAlgorithm {
 public:
     GeneticAlgorithm(
         FitnessTerminiateSignalContainer<Gene> *fitnessTerminiateSignalContainer,
-        usize populationSize = 100
+        usize populationSize = 100,
+        double mutRate = 0.75
     ) :
     	mFitnessTerminiateSignalContainer(fitnessTerminiateSignalContainer),
-        mPopulationSize(populationSize) {
+        mPopulationSize(populationSize),
+        mMutRate(mutRate) {
 
         InitPopulation(populationSize);
     }
@@ -65,7 +70,7 @@ public:
     }
 
     Gene getBest () {
-        return mPopulation.front().first;
+    	return mPopulation.front().first;
     }
 };
 

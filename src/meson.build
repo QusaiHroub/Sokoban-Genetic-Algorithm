@@ -9,3 +9,6 @@ executable('ai-project', ai_project_sources,
   dependencies: ai_project_deps,
   install: true,
 )
+
+
+subdir('puzzles')
